@@ -7,19 +7,12 @@ string allow = "all";
 list alist = [];
 // volume of the sound. 0.0 = silent while 1.0 is max volume
 float volume = 0.5;
-// dont worry about this varables below.
-integer iCount;
-
 // this script can handle multiple sound files in the same prim as this script
-
 default {
 	touch_end(integer num_detected) {
-		if (allow == "all" || 
-		allow == "owner" && llDetectedKey(0) == llGetOwner() || 
-		allow == "group" && llSameGroup(llDetectedKey(0)) || 
-		allow == "list" && llListFindList(alist, [llDetectedName(0)]) != -1) {
+		if (allow == "all" || allow == "owner" && llDetectedKey(0) == llGetOwner() || allow == "group" && llSameGroup(llDetectedKey(0)) || allow == "list" && llListFindList(alist, [llDetectedName(0)]) != -1) {
 			llStopSound();
-			iCount = llGetInventoryNumber(INVENTORY_SOUND);
+			integer iCount = llGetInventoryNumber(INVENTORY_SOUND);
 			integer inv = llRound(llFrand(iCount));
 			if (inv == iCount) {
 				inv = 0;

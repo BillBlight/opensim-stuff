@@ -1,5 +1,5 @@
 <?php
-$loginuri = "http://virtlife.net:8002";
+$loginuri = "http://localhost:8002";
 function ping ($host, $timeout = 1) {
     /* ICMP ping packet with a pre-calculated checksum */
     $package = "\x08\x00\x7d\x4b\x00\x00\x00\x00PingHost";
@@ -25,7 +25,7 @@ if (ping($loginuri, 10)) {
 }
 $host = "localhost";
 $user = "root";
-$pass = "l0v3sux";
+$pass = "password";
 $dbname = "robust";
 $mysqli = new mysqli($host,$user,$pass,$dbname);
 $presenceuseraccount = 0;

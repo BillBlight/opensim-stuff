@@ -1,45 +1,54 @@
 <?php
-$loginuri = "http://localhost:8002";
-function ping ($host, $timeout = 1) {
-    /* ICMP ping packet with a pre-calculated checksum */
-    $package = "\x08\x00\x7d\x4b\x00\x00\x00\x00PingHost";
-    $socket = socket_create(AF_INET, SOCK_RAW, 1);
-    socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array('sec' => $timeout, 'usec' => 0));
-    socket_connect($socket, $host, null);
 
-    $ts = microtime(true);
-    socket_send($socket, $package, strLen($package), 0);
-    if (socket_read($socket, 255)) {    
-        $result = true;
-    } else {
-        $result = false;
-    }
-    socket_close($socket);
-
-    return $result;
-}
-if (ping($loginuri, 10)) {
-	$gstatus = "ONLINE";
-}else{
-	$gstatus = "OFFLINE";
-}
+$website = "http://yourgridurl.xxx";
+$loginscreen = "path_to_your_login_screen";
+$robustURL   = "yourgridurl"; //FQDN or IP to your grid/robust server
+$robustPORT = "8002"; //port for your robust
+$website = "http://yourwebsiteurl.xxx";
+$loginuri = "http://".$robustURL.":".$robustPORT."";
+//your database info
 $host = "localhost";
-$user = "root";
-$pass = "password";
-$dbname = "robust";
+$user = "username";
+$pass = "pass";
+$dbname = "dbname";
+
+
+// Online / Offline with socket
+$socket = @fsockopen($robustURL, $robustPORT, $errno, $errstr, 1);
+if (is_resource($socket))
+{
+$gstatus = "ONLINE";
+$color = "green";
+}
+else {
+$gstatus = "OFFLINE";
+$color = "red";
+}
+@fclose($socket);
+
+
+
 $mysqli = new mysqli($host,$user,$pass,$dbname);
 $presenceuseraccount = 0;
 $preshguser = 0;
-if ($pres = $mysqli->query("SELECT * FROM Presence")) {
+$monthago = time() - 2592000;
+$lastmonth = time() - 2419200;
+if ($pres = $mysqli->query("SELECT * FROM GridUser")) {
 	while ($presrow = $pres->fetch_array()) {
-		if ($luser = $mysqli->query("SELECT * FROM UserAccounts WHERE PrincipalID = '".$presrow['UserID']."'")) {
+		if ($luser = $mysqli->query("
+    SELECT UserID, Login
+ 	WHERE UserID LIKE '%http%'
+	AND Login < ".lastmonth."")) 
+	
+	{
 			++$presenceuseraccount;
 		}else{
 			++$preshguser;
 		}
 	}
 }
-$monthago = time() - 2592000;
+
+
 $pastmonth = 0;
 if ($tpres = $mysqli->query("SELECT * FROM GridUser WHERE Logout < '".$monthago."'")) {
 	$pastmonth = $tpres->num_rows;
@@ -64,15 +73,19 @@ if($regiondb = $mysqli->query("SELECT * FROM regions")) {
 		$totalsize += $rsize;
 	}
 }
-$arr = ['GridStatus' => $gstatus,
+$arr = ['GridStatus' => '<b><font color="'.$color.'">'.$gstatus.'</b></font>',
 	'InWorld' => number_format($presenceuseraccount),
-	'HGVisitors' => number_format($preshguser),
-	'MonthLogin' => number_format($pastmonth),
+	'HG_Visitors_Last_30_Days' => number_format($preshguser),
+	'Local_Users_Last_30_Days' => number_format($pastmonth),
 	'TotalAccounts' => number_format($totalaccounts),
 	'Regions' => number_format($totalregions),
-	'VarRegions' => number_format($totalvarregions),
-	'SingleRegions' => number_format($totalsingleregions),
-	'TotalLandSize' => number_format($totalsize)];
+	'Var_Regions' => number_format($totalvarregions),
+	'Single_Regions' => number_format($totalsingleregions),
+	'Total_LandSize' => number_format($totalsize),
+	'Login_URL' => $loginuri,
+	'Website' => '<i><a href='.$website.'>'.$website.'</a></i>',
+	'Login_Screen' => '<i><a href='.$loginscreen.'>'.$loginscreen.'</a></i>'];
+	
 if ($_GET['format'] == "json") {
 	header('Content-type: application/json');
 	echo json_encode($arr);
@@ -99,6 +112,7 @@ if ($_GET['format'] == "json") {
 	foreach($arr as $k => $v) {
 		echo '<B>'.$k.': </B>'.$v.'<br>';
 	}
-}
+
+	}
 $mysqli->close();
 ?>

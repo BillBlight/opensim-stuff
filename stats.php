@@ -4,6 +4,7 @@ $website = "http://yourgridurl.xxx";
 $loginscreen = "path_to_your_login_screen";
 $robustURL   = "yourgridurl"; //FQDN or IP to your grid/robust server
 $robustPORT = "8002"; //port for your robust
+$robustIP = "xxx.xxx.xxx.xxx" //added IP for times when DNS resolution is flakey, this is now used in the fsockopen so is required.
 $website = "http://yourwebsiteurl.xxx";
 $loginuri = "http://".$robustURL.":".$robustPORT."";
 //your database info

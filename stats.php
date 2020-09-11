@@ -14,7 +14,7 @@ $dbname = "dbname";
 
 
 // Online / Offline with socket
-$socket = @fsockopen($robustURL, $robustPORT, $errno, $errstr, 1);
+$socket = @fsockopen($robustIP, $robustPORT, $errno, $errstr, 1);
 if (is_resource($socket))
 {
 $gstatus = "ONLINE";
@@ -61,7 +61,7 @@ $totalregions = 0;
 $totalvarregions = 0;
 $totalsingleregions = 0;
 $totalsize = 0;
-if($regiondb = $mysqli->query("SELECT * FROM regions")) {
+if($regiondb = $mysqli->query("SELECT * FROM regions WHERE regionName NOT LIKE '%http%';")) {
 	while ($regions = $regiondb->fetch_array()) {
 		++$totalregions;
 		if ($regions['sizeX'] == 256) {
@@ -76,7 +76,7 @@ if($regiondb = $mysqli->query("SELECT * FROM regions")) {
 $arr = ['GridStatus' => '<b><font color="'.$color.'">'.$gstatus.'</b></font>',
 	'InWorld' => number_format($presenceuseraccount),
 	'HG_Visitors_Last_30_Days' => number_format($preshguser),
-	'Local_Users_Last_30_Days' => number_format($pastmonth),
+	'Local_Users_Logins_Last_30_Days' => number_format($pastmonth),
 	'TotalAccounts' => number_format($totalaccounts),
 	'Regions' => number_format($totalregions),
 	'Var_Regions' => number_format($totalvarregions),
